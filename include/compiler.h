@@ -17,4 +17,11 @@
 	    offsetof ( type, field ) +					\
 	    ( ( &( ( ( type * ) NULL )->field ) == ptr ) ? 0 : 0 ) ) )
 
+/*
+ * Allow for iPXE-style usage of strerror() on a negative error code
+ *
+ */
+#include <string.h>
+#define strerror( rc ) strerror ( ( (rc) >= 0 ) ? (rc) : -(rc) )
+
 #endif /* _COMPILER_H */

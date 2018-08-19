@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <getopt.h>
+#include <uniport/resource.h>
 #include <uniport/parseopt.h>
 
 /** @file
@@ -87,6 +88,25 @@ int parse_flag ( char *text __unused, int *flag ) {
 
 	/* Set flag */
 	*flag = 1;
+
+	return 0;
+}
+
+/**
+ * Parse resource URI
+ *
+ * @v text		Text
+ * @ret res		Resource
+ * @ret rc		Return status code
+ */
+int parse_resource ( char *text, struct resource **res ) {
+
+	/* Find resource */
+	*res = resource_find ( text );
+	if ( ! *res ) {
+		printf ( "\"%s\": no such resource\n", text );
+		return -ENOENT;
+	}
 
 	return 0;
 }

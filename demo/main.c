@@ -40,8 +40,16 @@
  *
  */
 extern struct init_fn devices_init_fn;
+extern struct command ls_command;
+extern struct command show_command;
+extern struct command set_command;
+extern struct command observe_command;
 void *linker_hacks[] = {
 	&devices_init_fn,
+	&ls_command,
+	&show_command,
+	&set_command,
+	&observe_command,
 };
 
 /**
