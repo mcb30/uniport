@@ -44,12 +44,14 @@ extern struct command ls_command;
 extern struct command show_command;
 extern struct command set_command;
 extern struct command observe_command;
+extern struct device buttons_dev;
 void *linker_hacks[] = {
 	&devices_init_fn,
 	&ls_command,
 	&show_command,
 	&set_command,
 	&observe_command,
+	&buttons_dev,
 };
 
 /**
