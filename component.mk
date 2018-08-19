@@ -1,6 +1,6 @@
 # Components
 #
-COMPONENT_SRCDIRS = demo
+COMPONENT_SRCDIRS = core demo
 
 # Treat all warnings as fatal
 #

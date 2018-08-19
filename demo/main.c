@@ -27,6 +27,7 @@
 #include "esp_vfs_dev.h"
 #include "driver/uart.h"
 #include "linenoise/linenoise.h"
+#include <uniport/init.h>
 
 #define PROMPT "uniport> "
 
@@ -49,6 +50,9 @@ void app_main ( void ) {
 	/* Configure line editor */
 	linenoiseSetMultiLine ( 1 );
 	linenoiseHistorySetMaxLen ( 100 );
+
+	/* Initialise system */
+	initialise();
 
 	/* Main loop */
 	while ( 1 ) {
