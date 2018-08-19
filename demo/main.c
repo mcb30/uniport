@@ -45,6 +45,7 @@ extern struct command show_command;
 extern struct command set_command;
 extern struct command observe_command;
 extern struct device buttons_dev;
+extern struct device oven_dev;
 void *linker_hacks[] = {
 	&devices_init_fn,
 	&ls_command,
@@ -52,6 +53,7 @@ void *linker_hacks[] = {
 	&set_command,
 	&observe_command,
 	&buttons_dev,
+	&oven_dev,
 };
 
 /**
