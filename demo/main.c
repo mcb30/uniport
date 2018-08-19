@@ -66,6 +66,9 @@ void app_main ( void ) {
 		/* Add to command history (ignoring errors) */
 		linenoiseHistoryAdd ( line );
 
+		/* Run command */
+		system ( line );
+
 		/* Free line */
 		free ( line );
 	}
