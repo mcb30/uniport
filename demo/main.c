@@ -31,6 +31,19 @@
 
 #define PROMPT "uniport> "
 
+/*
+ * Linker table hacks
+ *
+ * The build system does not yet provide an equivalent of the iPXE
+ * REQUIRE_OBJECT() macro.  These external symbol references provide a
+ * temporary hack to achieve the same end goal.
+ *
+ */
+extern struct init_fn devices_init_fn;
+void *linker_hacks[] = {
+	&devices_init_fn,
+};
+
 /**
  * Application entry point
  *
