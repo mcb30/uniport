@@ -90,7 +90,7 @@ static int temperature_units_parse ( struct property *prop __unused,
 			/* Accept if this is the only occurence */
 			if ( *value )
 				return -EINVAL;
-			*value = c;
+			*value = unit;
 			break;
 		default:
 			/* Ignore all other characters */
