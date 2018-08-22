@@ -30,6 +30,8 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <arpa/inet.h>
+#include <uniport/string.h>
 #include <uniport/property.h>
 
 /*****************************************************************************
@@ -173,6 +175,77 @@ static int string_parse ( struct property *prop __unused, const char *string,
 /** String property type */
 const struct property_type string_property =
 	PROPERTY_TYPE ( "string", const char *, string_format, string_parse );
+
+/*****************************************************************************
+ *
+ * UUID properties
+ *
+ *****************************************************************************
+ */
+
+/**
+ * Format property as string
+ *
+ * @v prop		Property
+ * @v buf		String buffer
+ * @v len		Length of string buffer
+ * @v value		State variable
+ * @ret len		Length of string
+ */
+static size_t uuid_format ( struct property *prop __unused, char *buf,
+			    size_t len, const union uuid *value ) {
+
+	/* Format string */
+	return snprintf ( buf, len,
+			  "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+			  ntohl ( value->canonical.a ),
+			  ntohs ( value->canonical.b ),
+			  ntohs ( value->canonical.c ),
+			  ntohs ( value->canonical.d ),
+			  value->canonical.e[0], value->canonical.e[1],
+			  value->canonical.e[2], value->canonical.e[3],
+			  value->canonical.e[4], value->canonical.e[5] );
+}
+
+/**
+ * Parse property from a string
+ *
+ * @v prop		Property
+ * @v string		String
+ * @v value		State variable
+ * @ret rc		Return status code
+ */
+static int uuid_parse ( struct property *prop __unused, const char *string,
+			union uuid *value ) {
+	uint8_t *byte = value->raw;
+	unsigned int character;
+	unsigned int digit;
+	unsigned int i;
+
+	/* Parse string */
+	for ( i = 0 ; i < ( sizeof ( value->raw ) * 2 /* digits */ ) ; i++ ) {
+
+		/* Skip any hyphens */
+		while ( ( character = *(string++) ) == '-' ) {}
+
+		/* Parse input character */
+		*byte <<= 4;
+		digit = digit_value ( character );
+		if ( digit >= 16 )
+			return -EINVAL;
+		*byte |= digit;
+
+		/* Move to next output byte if applicable */
+		if ( i % 2 )
+			byte++;
+	}
+
+	return 0;
+}
+
+/** UUID property type */
+const struct property_type uuid_property =
+	PROPERTY_TYPE ( "uuid", union uuid, uuid_format, uuid_parse );
 
 /*****************************************************************************
  *

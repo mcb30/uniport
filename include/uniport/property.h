@@ -8,6 +8,7 @@
  */
 
 #include <stddef.h>
+#include <uniport/uuid.h>
 
 /** A property */
 struct property {
@@ -85,6 +86,7 @@ struct property_type {
 extern const struct property_type boolean_property;
 extern const struct property_type integer_property;
 extern const struct property_type string_property;
+extern const struct property_type uuid_property;
 
 /** Define a boolean property */
 #define PROPERTY_BOOLEAN( _name, _state, _field ) \
@@ -97,6 +99,10 @@ extern const struct property_type string_property;
 /** Define a string property */
 #define PROPERTY_STRING( _name, _state, _field ) \
 	PROPERTY ( _name, _state, _field, const char *, &string_property )
+
+/** Define a UUID property */
+#define PROPERTY_UUID( _name, _state, _field ) \
+	PROPERTY ( _name, _state, _field, union uuid, &uuid_property )
 
 extern size_t property_format ( struct property *prop, char *buf, size_t len,
 				const void *state );
