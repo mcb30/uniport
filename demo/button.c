@@ -45,8 +45,8 @@ struct button_state {
 
 /** Button properties */
 static struct property button_props[] = {
-	PROPERTY_BOOLEAN ( "value", struct button_state, value ),
-	PROPERTY_STRING ( "n", struct button_state, name ),
+	PROPERTY_BOOLEAN ( "value", struct button_state, value, 0 ),
+	PROPERTY_STRING ( "n", struct button_state, name, PROP_RW | PROP_META ),
 };
 
 /** A button */

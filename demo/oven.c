@@ -31,7 +31,6 @@
 
 /** Power control */
 #define OVEN_GPIO_POWER 23
-
 /** Power control state */
 struct oven_power_state {
 	/** Binary switch value */
@@ -42,8 +41,9 @@ struct oven_power_state {
 
 /** Power control properties */
 static struct property oven_power_props[] = {
-	PROPERTY_BOOLEAN ( "value", struct oven_power_state, value ),
-	PROPERTY_STRING ( "n", struct oven_power_state, name ),
+	PROPERTY_BOOLEAN ( "value", struct oven_power_state, value, PROP_RW ),
+	PROPERTY_STRING ( "n", struct oven_power_state, name,
+			  PROP_RW | PROP_META ),
 };
 
 /** Power control */
@@ -66,13 +66,24 @@ struct oven_temperature_state {
 	const char *name;
 };
 
-/** Temperature properties */
-static struct property oven_temperature_props[] = {
+/** Current temperature properties */
+static struct property oven_current_props[] = {
 	PROPERTY_INTEGER ( "temperature", struct oven_temperature_state,
-			   temperature ),
+			   temperature, 0 ),
 	PROPERTY_TEMPERATURE_UNITS ( "units", struct oven_temperature_state,
-				     units ),
-	PROPERTY_STRING ( "n", struct oven_temperature_state, name ),
+				     units, 0 ),
+	PROPERTY_STRING ( "n", struct oven_temperature_state, name,
+			  PROP_RW | PROP_META ),
+};
+
+/** Target temperature properties */
+static struct property oven_target_props[] = {
+	PROPERTY_INTEGER ( "temperature", struct oven_temperature_state,
+			   temperature, PROP_RW ),
+	PROPERTY_TEMPERATURE_UNITS ( "units", struct oven_temperature_state,
+				     units, PROP_RW ),
+	PROPERTY_STRING ( "n", struct oven_temperature_state, name,
+			  PROP_RW | PROP_META ),
 };
 
 /** Temperature */
@@ -163,12 +174,12 @@ static int oven_target_update ( struct resource *res,
 
 /** Target temperature resource descriptor */
 static struct resource_descriptor oven_target_desc =
-	RESOURCE_DESC ( struct oven_temperature_state, oven_temperature_props,
+	RESOURCE_DESC ( struct oven_temperature_state, oven_target_props,
 			oven_temperature_retrieve, oven_target_update, NULL );
 
 /** Current temperature resource descriptor */
 static struct resource_descriptor oven_current_desc =
-	RESOURCE_DESC ( struct oven_temperature_state, oven_temperature_props,
+	RESOURCE_DESC ( struct oven_temperature_state, oven_current_props,
 			oven_temperature_retrieve, NULL, NULL );
 
 /** The oven */
