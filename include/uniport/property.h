@@ -18,15 +18,24 @@ struct property {
 	size_t offset;
 	/** Property type */
 	const struct property_type *type;
+	/** Property flags */
+	unsigned int flags;
 };
 
+/** Property is writable */
+#define PROP_RW 0x00000001
+
+/** Property is metadata */
+#define PROP_META 0x00000002
+
 /** Define a property */
-#define PROPERTY( _name, _state, _field, _check, _type ) {		\
+#define PROPERTY( _name, _state, _field, _check, _type, _flags ) {	\
 	.name = _name,							\
 	.offset = ( offsetof ( _state, _field ) +			\
 		    ( ( &( ( ( _state * ) NULL )->_field ) ==		\
 			( ( _check * ) NULL ) ) ? 0 : 0 ) ),		\
 	.type = _type,							\
+	.flags = _flags,						\
 	}
 
 /** A property type */
@@ -89,16 +98,19 @@ extern const struct property_type string_property;
 extern const struct property_type uuid_property;
 
 /** Define a boolean property */
-#define PROPERTY_BOOLEAN( _name, _state, _field ) \
-	PROPERTY ( _name, _state, _field, bool, &boolean_property )
+#define PROPERTY_BOOLEAN( _name, _state, _field, _flags )		\
+	PROPERTY ( _name, _state, _field, bool, &boolean_property,	\
+		   _flags )
 
 /** Define an integer property */
-#define PROPERTY_INTEGER( _name, _state, _field ) \
-	PROPERTY ( _name, _state, _field, int, &integer_property )
+#define PROPERTY_INTEGER( _name, _state, _field, _flags )		\
+	PROPERTY ( _name, _state, _field, int, &integer_property,	\
+		   _flags )
 
 /** Define a string property */
-#define PROPERTY_STRING( _name, _state, _field ) \
-	PROPERTY ( _name, _state, _field, const char *, &string_property )
+#define PROPERTY_STRING( _name, _state, _field, _flags )		\
+	PROPERTY ( _name, _state, _field, const char *,			\
+		   &string_property, _flags )
 
 /** Define a UUID property */
 #define PROPERTY_UUID( _name, _state, _field ) \

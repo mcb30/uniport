@@ -19,9 +19,9 @@ enum temperature_units {
 extern const struct property_type temperature_units_property;
 
 /** Define a temperature units property */
-#define PROPERTY_TEMPERATURE_UNITS( _name, _state, _field )		\
+#define PROPERTY_TEMPERATURE_UNITS( _name, _state, _field, _flags )	\
 	PROPERTY ( _name, _state, _field, enum temperature_units,	\
-		   &temperature_units_property )
+		   &temperature_units_property, _flags )
 
 /** Convert Celsius to Fahrenheit, using integer operations
  *
