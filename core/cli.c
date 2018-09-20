@@ -23,6 +23,7 @@
 #include <uniport/resource.h>
 #include <uniport/command.h>
 #include <uniport/parseopt.h>
+#include <uniport/interface.h>
 
 /** @file
  *
@@ -67,7 +68,7 @@ static struct cli_observer * cli_observer ( struct resource *res ) {
 static void cli_notify ( struct observer *obs, const void *state ) {
 
 	/* Print resource state */
-	resource_print ( obs->res, state );
+	resource_print ( obs->res, obs->intf, state );
 }
 
 /** "ls" options */
@@ -114,10 +115,16 @@ struct command ls_command __command = {
 };
 
 /** "show" options */
-struct show_options {};
+struct show_options {
+	/** Interface in use */
+	struct interface *intf;
+};
 
 /** "show" option list */
-static struct option_descriptor show_opts[] = {};
+static struct option_descriptor show_opts[] = {
+	OPTION_DESC ( "interface", 'i', required_argument,
+		      struct show_options, intf, parse_interface ),
+};
 
 /** "show" command descriptor */
 static struct command_descriptor show_cmd =
@@ -146,11 +153,15 @@ static int show_exec ( int argc, char **argv ) {
 	if ( ( rc = parse_resource ( uri, &res ) ) != 0 )
 		return rc;
 
+	/* Default to baseline interface where not specified */
+	if ( ! opts.intf )
+		opts.intf = &oic_if_baseline;
+
 	/* Retrieve resource state */
 	state = resource_retrieve ( res );
 
 	/* Print resource state */
-	resource_print ( res, state );
+	resource_print ( res, opts.intf, state );
 
 	return 0;
 }
@@ -162,10 +173,16 @@ struct command show_command __command = {
 };
 
 /** "set" options */
-struct set_options {};
+struct set_options {
+	/** Interface in use */
+	struct interface *intf;
+};
 
 /** "set" option list */
-static struct option_descriptor set_opts[] = {};
+static struct option_descriptor set_opts[] = {
+	OPTION_DESC ( "interface", 'i', required_argument,
+		      struct set_options, intf, parse_interface ),
+};
 
 /** "set" command descriptor */
 static struct command_descriptor set_cmd =
@@ -199,6 +216,10 @@ static int set_exec ( int argc, char **argv ) {
 	if ( ( rc = parse_resource ( uri, &res ) ) != 0 )
 		goto err_parse_resource;
 
+	/* Default to baseline interface where not specified */
+	if ( ! opts.intf )
+		opts.intf = &oic_if_baseline;
+
 	/* Allocate space for copy of resource state */
 	state = malloc ( res->desc->len );
 	if ( ! state ) {
@@ -231,6 +252,21 @@ static int set_exec ( int argc, char **argv ) {
 			goto err_property;
 		}
 
+		/* Check if interface has property */
+		if ( ! interface_has_property ( opts.intf, prop ) ) {
+			printf ( "\"%s\": not accessible via \"%s\"\n",
+				 name, opts.intf->name );
+			rc = -ENOTTY;
+			goto err_interface;
+		}
+
+		/* Check if property is writable */
+		if ( ! ( prop->flags & PROP_RW ) ) {
+			printf ( "\"%s\": property is read-only\n", name );
+			rc = -EROFS;
+			goto err_read_only;
+		}
+
 		/* Parse property */
 		if ( ( rc = property_parse ( prop, value, state ) ) != 0 ) {
 			printf ( "\"%s\": %s\n", name, strerror ( rc ) );
@@ -247,6 +283,8 @@ static int set_exec ( int argc, char **argv ) {
 
  err_update:
  err_parse:
+ err_read_only:
+ err_interface:
  err_property:
  err_sep:
 	free ( state );
@@ -266,12 +304,16 @@ struct command set_command __command = {
 struct observe_options {
 	/** Delete observer */
 	int delete;
+	/** Interface in use */
+	struct interface *intf;
 };
 
 /** "observe" option list */
 static struct option_descriptor observe_opts[] = {
 	OPTION_DESC ( "delete", 'd', no_argument,
 		      struct observe_options, delete, parse_flag ),
+	OPTION_DESC ( "interface", 'i', required_argument,
+		      struct observe_options, intf, parse_interface ),
 };
 
 /** "observe" command descriptor */
@@ -301,21 +343,29 @@ static int observe_exec ( int argc, char **argv ) {
 	if ( ( rc = parse_resource ( uri, &res ) ) != 0 )
 		return rc;
 
+	/* Default to baseline interface where not specified */
+	if ( ! opts.intf )
+		opts.intf = &oic_if_baseline;
+
 	/* Find existing observer, if any */
 	obs = cli_observer ( res );
 
-	/* Create or delete observer as applicable */
+	/* Create, delete, or modify observer as applicable */
 	if ( ( ! obs ) && ( ! opts.delete ) ) {
 		obs = malloc ( sizeof ( *obs ) );
 		if ( ! obs )
 			return -ENOMEM;
-		observer_init ( &obs->obs, res, cli_notify );
+		observer_init ( &obs->obs, res, opts.intf, cli_notify );
 		list_add_tail ( &obs->list, &cli_observers );
 		resource_observe ( &obs->obs );
 	} else if ( obs && opts.delete ) {
 		resource_unobserve ( &obs->obs );
 		list_del ( &obs->list );
 		free ( obs );
+	} else if ( obs ) {
+		resource_unobserve ( &obs->obs );
+		obs->obs.intf = opts.intf;
+		resource_observe ( &obs->obs );
 	}
 
 	return 0;

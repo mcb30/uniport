@@ -12,6 +12,7 @@
 #include <getopt.h>
 
 struct resource;
+struct interface;
 
 /** A command-line option descriptor */
 struct option_descriptor {
@@ -118,6 +119,7 @@ extern int parse_string ( char *text, char **value );
 extern int parse_integer ( char *text, unsigned int *value );
 extern int parse_flag ( char *text __unused, int *flag );
 extern int parse_resource ( char *text, struct resource **res );
+extern int parse_interface ( char *text, struct interface **intf );
 extern void print_usage ( struct command_descriptor *cmd, char **argv );
 extern int reparse_options ( int argc, char **argv,
 			     struct command_descriptor *cmd, void *opts );

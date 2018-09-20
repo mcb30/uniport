@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include <uniport/resource.h>
+#include <uniport/interface.h>
 
 /** List of resource namespaces */
 struct list_head namespaces = LIST_HEAD_INIT ( namespaces );
@@ -115,8 +116,10 @@ void resource_notify ( struct resource *res ) {
  *
  * @v res		Resource
  * @v state		Resource state
+ * @v intf		Interface
  */
-void resource_print ( struct resource *res, const void *state ) {
+void resource_print ( struct resource *res, struct interface *intf,
+		      const void *state ) {
 	struct property *prop;
 	char *value;
 	unsigned int i;
@@ -125,6 +128,8 @@ void resource_print ( struct resource *res, const void *state ) {
 	printf ( "%s:", res->uri );
 	for ( i = 0 ; i < res->desc->count ; i++ ) {
 		prop = &res->desc->props[i];
+		if ( ! interface_has_property ( intf, prop ) )
+			continue;
 		value = property_format_alloc ( prop, state );
 		printf ( " %s=%s", prop->name, ( value ? value : "<ENOMEM>" ) );
 		free ( value );
@@ -168,8 +173,10 @@ int resource_register ( struct namespace *ns ) {
 
 	/* Print initial resource state for diagnostics */
 	printf ( "Namespace %s...\n", ns->uri );
-	for ( res = ns->resources ; *res ; res++ )
-		resource_print ( *res, resource_retrieve ( *res ) );
+	for ( res = ns->resources ; *res ; res++ ) {
+		resource_print ( *res, &oic_if_baseline,
+				 resource_retrieve ( *res ) );
+	}
 
 	return 0;
 }

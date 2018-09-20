@@ -12,6 +12,8 @@
 #include <uniport/list.h>
 #include <uniport/property.h>
 
+struct interface;
+
 /** A resource namespace */
 struct namespace {
 	/** List of namespaces */
@@ -38,6 +40,8 @@ struct observer {
 	struct resource *res;
 	/** List of observers */
 	struct list_head list;
+	/** Interface */
+	struct interface *intf;
 	/**
 	 * Notify of change in resource state
 	 *
@@ -120,14 +124,17 @@ struct resource_descriptor {
  *
  * @v obs		Observer
  * @v res		Resource
+ * @v intf		Interface
  * @v notify		Notification handler
  */
 static inline __attribute__ (( always_inline )) void
 observer_init ( struct observer *obs, struct resource *res,
+		struct interface *intf,
 		void ( * notify ) ( struct observer *obs,
 				    const void *state ) ) {
 
 	obs->res = res;
+	obs->intf = intf;
 	obs->notify = notify;
 }
 
@@ -150,7 +157,8 @@ extern int resource_update ( struct resource *res, const void *state );
 extern void resource_observe ( struct observer *obs );
 extern void resource_unobserve ( struct observer *obs );
 extern void resource_notify ( struct resource *res );
-extern void resource_print ( struct resource *res, const void *state );
+extern void resource_print ( struct resource *res, struct interface *intf,
+			     const void *state );
 extern int resource_register ( struct namespace *ns );
 extern void resource_unregister ( struct namespace *ns );
 extern struct resource * resource_find ( const char *uri );

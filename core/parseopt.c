@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <getopt.h>
 #include <uniport/resource.h>
+#include <uniport/interface.h>
 #include <uniport/parseopt.h>
 
 /** @file
@@ -105,6 +106,25 @@ int parse_resource ( char *text, struct resource **res ) {
 	*res = resource_find ( text );
 	if ( ! *res ) {
 		printf ( "\"%s\": no such resource\n", text );
+		return -ENOENT;
+	}
+
+	return 0;
+}
+
+/**
+ * Parse interface name
+ *
+ * @v text		Text
+ * @ret intf		Interface
+ * @ret rc		Return status code
+ */
+int parse_interface ( char *text, struct interface **intf ) {
+
+	/* Find interface */
+	*intf = interface_find ( text );
+	if ( ! *intf ) {
+		printf ( "\"%s\": no such interface\n", text );
 		return -ENOENT;
 	}
 
