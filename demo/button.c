@@ -179,6 +179,7 @@ static void buttons_init ( void ) {
 	/* Configure GPIOs */
 	for ( res = buttons_res ; *res ; res++ ) {
 		button = container_of ( *res, struct button, res );
+		gpio_reset_pin ( button->gpio );
 		gpio_set_direction ( button->gpio, GPIO_MODE_INPUT );
 		gpio_set_pull_mode ( button->gpio, GPIO_PULLUP_ONLY );
 		gpio_set_intr_type ( button->gpio, GPIO_INTR_ANYEDGE );

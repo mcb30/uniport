@@ -243,6 +243,7 @@ struct device oven_dev __device = {
 static void oven_init ( void ) {
 
 	/* Configure GPIOs */
+	gpio_reset_pin ( oven.power.gpio );
 	gpio_set_direction ( oven.power.gpio, GPIO_MODE_OUTPUT );
 }
 
